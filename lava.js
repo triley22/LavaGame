@@ -1,17 +1,17 @@
 //JavaScript Lava Game
 
 //two dimensional grid
-var simpleLevelPlan = [
-  "                      ",
-  "                      ",
-  "  x              = x  ",
-  "  x         o o    x  ",
-  "  x @      xxxxx   x  ",
-  "  xxxxx            x  ",
-  "      x!!!!!!!!!!!!x  ",
-  "      xxxxxxxxxxxxxx  ",
-  "                      "
-];
+// var simpleLevelPlan = [
+//   "                      ",
+//   "                      ",
+//   "  x              = x  ",
+//   "  x         o o    x  ",
+//   "  x @      xxxxx   x  ",
+//   "  xxxxx            x  ",
+//   "      x!!!!!!!!!!!!x  ",
+//   "      xxxxxxxxxxxxxx  ",
+//   "                      "
+// ];
 
 //game_levels
 
@@ -251,8 +251,8 @@ function Coin(pos) {
 }
 Coin.prototype.type = "coin";
 
-var simpleLevel = new Level(simpleLevelPlan);
-console.log(simpleLevel.width, "by", simpleLevel.height);
+// var simpleLevel = new Level(simpleLevelPlan);
+// console.log(simpleLevel.width, "by", simpleLevel.height);
 
 //drawing
 
@@ -586,18 +586,3 @@ function runGame(plans, Display) {
   }
   startLevel(0);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
