@@ -123,7 +123,7 @@ function elt(name, className) {
 
 function DOMDisplay(parent, level) {
   this.wrap = parent.appendChild(elt("div", "game"));
-  this.level;
+  this.level = level;
 
   this.wrap.appendChild(this.drawBackground());
   this.actorLayer = null;
