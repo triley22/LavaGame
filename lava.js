@@ -168,7 +168,7 @@ DOMDisplay.prototype.drawFrame = function() {
   this.scrollPlayerIntoView();
 };
 
-//
+
 
 DOMDisplay.prototype.scrollPlayerIntoView = function() {
   var width = this.wrap.clientWidth;
@@ -199,8 +199,45 @@ DOMDisplay.prototype.clear = function() {
   this.wrap.parentNode.removeChild(this.wrap);
 };
 
+//Motion and Collision
 
+//method tells whether rectangle overlaps any nonempty space on background grid
 
+Level.prototype.obstacleAt = function(pos, size) {
+  var xStart = Math.floor(pos.x);
+  var xEnd = Math.ceil(pos.x + size.x);
+  var yStart = Math.floor(pos.y);
+  var yEnd = Math.ceil(pos.y + size.y);
+
+  if (xStart < 0 || xEnd > this.width || yStart < 0)
+    return "wall";
+  if (yEnd > this.height)
+    return "lava";
+  for (var y = yStart; y < yEnd; y++) {
+    for (var x = xStart; x < xEnd; x++) {
+      var fieldType = this.grid[y][x];
+      if (fieldType) return fieldType;
+    }
+  }
+};
+
+// if body sticks out of the level we return wall for sides and top and lava for bottom
+//this ensures that the player dies when falling out of the world
+//when the body is fully inside the grid, loop over the block of grid squares
+
+//collisions are handled after player moves
+
+Level.prototype.actorAt = function(actor) {
+  for (var i = 0; i < this.actors.length; i++) {
+    var other = this.actors[i];
+    if (other != actor &&
+      actor.pos.x + actor.size.x > other.pos.x &&
+      actor.pos.x < other.pos.x + other.size.x &&
+      actor.pos.y + actor.size.y > other.pos.y &&
+      actor.pos.y < other.pos.y + other.size.y)
+      return other;
+  }
+};
 
 
 
