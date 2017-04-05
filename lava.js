@@ -239,6 +239,128 @@ Level.prototype.actorAt = function(actor) {
   }
 };
 
+//Actors and Actions
+
+
+//animate method on level type gives movement, step argument is time in seconds
+//keys object contains information about arrow keys that have been pressed
+
+var maxStep = 0.05;
+
+Level.prototype.animate = function(step, keys) {
+  if (this.status != null)
+    this.finishDelay -= step;
+
+  while (step > 0) {
+    var thisStep = Math.min(step, maxStep);
+    this.actors.forEach(function(actor) {
+      actor.act(thisStep, this, keys);
+    }, this);
+    step -= thisStep;
+  }
+};
+
+//computes new position by adding the product of the time step and its current speed to old position
+//if no obstacle blocks that new position, it moves there
+
+Lava.prototype.act = function(step, level) {
+  var newPos = this.pos.plus(this.speed.times(step));
+  if (!level.obstacleAt(newPos, this.size))
+    this.pos = newPos;
+  else if (this.repeatPos)
+    this.pos = this.repeatPos;
+  else
+    this.speed = this.speed.times(-1);
+};
+
+//wobble property is updated to track time and used as argument Math.sin to compute new position
+
+var wobbleSpeed = 8, wobbleDist = 0.07;
+
+Coin.prototype.act = function(step) {
+  this.wobble += step * wobbleSpeed;
+  var wobblePos = Math.sin(this.wobble) * wobbleDist;
+  this.pos = this.basePos.plus(new Vector(0, wobblePos));
+};
+
+//horizontal motion
+
+var playerXSpeed = 7;
+
+Player.prototype.moveX = function(step, level, keys) {
+  this.speed.x = 0;
+  if (keys.left) this.speed.x -= playerXSpeed;
+  if (keys.right) this.speed.x += playerXSpeed;
+
+  var motion = new Vector(this.speed.x * step, 0);
+  var newPos = this.pos.plus(motion);
+  var obstacle = level.obstacleAt(newPos, this.size);
+  if (obstacle)
+    level.playerTouched(obstacle);
+  else
+    this.pos = newPos;
+};
+
+//motion causes the player to hit something, the level’s playerTouched method, which handles things like dying in lava and collecting coins, is called
+
+//vertical motion works in a similar way but has to simulate jumping and gravity
+//beginning of method player is accelerated vertically to account for gravity
+
+var gravity = 30;
+var jumpSpeed = 17;
+
+Player.prototype.moveY = function(step, level, keys) {
+  this.speed.y += step * gravity;
+  var motion = new Vector(0, this.speed.y * step);
+  var newPos = this.pos.plus(motion);
+  var obstacle = level.obstacleAt(newPos, this.size);
+  if (obstacle) {
+    level.playerTouched(obstacle);
+    if (keys.up && this.speed.y > 0)
+      this.speed.y = -jumpSpeed;
+    else
+      this.speed.y = 0;
+  } else {
+    this.pos = newPos;
+  }
+};
+
+//after moving, method checks for other actors that the player is colliding
+
+Player.prototype.act = function(step, level, keys) {
+  this.moveX(step, level, keys);
+  this.moveY(step, level, keys);
+
+  var otherActor = level.actorAt(this);
+  if (otherActor)
+    level.playerTouched(otherActor.type, otherActor);
+
+  //losing animation
+  if (level.status == "lost") {
+    this.pos.y += step;
+    this.size.y -= step;
+  }
+};
+
+//when player touches lava (dies) they will sink down
+
+Level.prototype.playerTouched = function(type, actor) {
+  if (type == "lava" && this.status == null) {
+    this.status = "lost";
+    this.finishDelay = 1;
+  } else if (type == "coin") {
+    this.actors = this.actors.filter(function(other) {
+      return other != actor;
+    });
+    if (!this.actors.some(function(actor) {
+      return actor.type == "coin";
+    })) {
+      this.status = "won";
+      this.finishDelay = 1;
+    }
+  }
+};
+
 
 
 
